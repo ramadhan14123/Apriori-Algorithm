@@ -1,0 +1,11 @@
+{
+  "data": "Datasets/Dataset_Preprocessed - Sheet2.csv",
+  "min_support": 0.22,
+  "min_confidence": 0.77, 
+  "min_lift": 1.0,
+  "all_combos_max_k": null,
+  "seed": 42,
+  "test_size": 0.2,
+  "progress": true,
+  "no_eval": false
+}
