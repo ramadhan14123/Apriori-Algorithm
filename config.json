@@ -1,7 +1,7 @@
 {
-  "data": "Datasets/Dataset_Preprocessed - Sheet2.csv",
+  "data": "Datasets/20_datasets",
   "min_support": 0.22,
-  "min_confidence": 0.77, 
+  "min_confidence": 0.7, 
   "min_lift": 1.0,
   "all_combos_max_k": null,
   "seed": 42,

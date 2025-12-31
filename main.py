@@ -28,6 +28,7 @@ def main():
 	)
 	parser.add_argument("--min_support", type=float, default=None, help="Minimum support (0-1) for frequent itemsets.")
 	parser.add_argument("--min_confidence", type=float, default=None, help="Minimum confidence (0-1) for rules.")
+	parser.add_argument("--output_all_rules", action="store_true", help="If set, include all generated rules (no filtering by min_confidence/min_lift). The original filtering code will be kept as comments.")
 	parser.add_argument("--min_lift", type=float, default=None, help="Minimum lift for rules (default: 1.0).")
 	parser.add_argument(
 		"--all_combos_max_k",
@@ -42,8 +43,7 @@ def main():
 	parser.add_argument("--config", type=str, default=None, help="Path to JSON config file to set defaults.")
 	args = parser.parse_args()
 
-	# Resolve config and effective parameters (CLI overrides config; defaults last)
-	default_data = os.path.join(os.path.dirname(__file__), "Datasets", "Dataset_Preprocessed - Sheet1.csv")
+	default_data = os.path.join(os.path.dirname(__file__), "Datasets", "20_datasets.csv")
 	cfg: AprioriConfig = load_config_json(args.config) if args.config else AprioriConfig()
 	data_path = args.data or cfg.data or default_data
 	min_support = args.min_support if args.min_support is not None else (cfg.min_support if cfg.min_support is not None else 0.05)
@@ -71,8 +71,13 @@ def main():
 
 	# Association rules
 	print("[3/5] Generating association rules...")
-	rules = generate_rules(frequents_by_k, support_counts, min_confidence, num_tx, min_lift=min_lift)
-	print(f"Generated {len(rules)} rules with confidence >= {min_confidence} and lift >= {min_lift}")
+	rules = generate_rules(
+		frequents_by_k, support_counts, min_confidence, num_tx, min_lift=min_lift, output_all=args.output_all_rules
+	)
+	if args.output_all_rules:
+		print(f"Generated {len(rules)} rules (no confidence/lift filtering applied)")
+	else:
+		print(f"Generated {len(rules)} rules with confidence >= {min_confidence} and lift >= {min_lift}")
 
 	# Exhaustive combinations
 	print("[4/5] Computing support for all combinations...")
@@ -95,7 +100,9 @@ def main():
 		# Refit on train to avoid test leakage when counting support
 		ctx_train = build_fast_context(train_tx, item_names, progress=bool(progress))
 		frequents_train, counts_train = apriori(train_tx, min_support=min_support, ctx=ctx_train, progress=bool(progress))
-		rules_train = generate_rules(frequents_train, counts_train, min_confidence, len(train_tx), min_lift=min_lift)
+		rules_train = generate_rules(
+			frequents_train, counts_train, min_confidence, len(train_tx), min_lift=min_lift, output_all=args.output_all_rules
+		)
 		rules_eval = evaluate_rules_on_test(rules_train, test_tx)
 		print(f"Evaluated {len(rules_eval)} rules on test set ({len(test_tx)} tx).")
 

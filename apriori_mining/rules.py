@@ -9,6 +9,7 @@ def generate_rules(
     min_confidence: float,
     num_tx: int,
     min_lift: float = 1.0,
+    output_all: bool = False,
 ) -> List[Dict[str, object]]:
     rules: List[Dict[str, object]] = []
     for k, d in frequents_by_k.items():
@@ -28,11 +29,19 @@ def generate_rules(
                     if supp_ante <= 0:
                         continue
                     confidence = supp_itemset / supp_ante
-                    if confidence + 1e-12 < min_confidence:
-                        continue
+                    # By default we filter rules by min_confidence and min_lift.
+                    # If `output_all` is True we skip filtering so all generated rules are returned
+                    # (the original filtering logic is preserved below as commented lines).
+                    if not output_all:
+                        if confidence + 1e-12 < min_confidence:
+                            continue
+                    # else: (no filtering by confidence)
+
                     lift = confidence / supp_cons if supp_cons > 0 else float("inf")
-                    if lift + 1e-12 < min_lift:
-                        continue
+                    if not output_all:
+                        if lift + 1e-12 < min_lift:
+                            continue
+                    # else: (no filtering by lift)
                     leverage = supp_itemset - (supp_ante * supp_cons)
                     conviction = (1 - supp_cons) / (1 - confidence) if (1 - confidence) > 0 else float("inf")
                     rules.append(

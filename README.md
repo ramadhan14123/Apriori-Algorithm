@@ -77,6 +77,17 @@ Atau override nilai tertentu via CLI (menggantikan nilai di config):
 ```powershell
 python .\main.py --config .\config.json --min_support 0.15 --min_confidence 0.6
 ```
+ 
+Opsi tambahan:
+- `--output_all_rules` : bila diberikan, program akan menyertakan semua aturan yang mungkin dihasilkan dari frequent itemsets tanpa menyaring berdasarkan `min_confidence` atau `min_lift`. Ini berguna jika Anda ingin melakukan pemetaan/peranking sendiri. Kode penyaringan asli tetap ada (tetap di file sebagai komentar/guard) sehingga tidak hilang.
+ 
+Contoh (tampilkan semua rule tanpa filter):
+
+```powershell
+python .\main.py --config .\config.json --output_all_rules
+```
+
+Peringatan: menampilkan semua aturan dapat menghasilkan jumlah aturan yang sangat besar (eksponensial terhadap ukuran itemset). Gunakan `all_combos_max_k` atau batasi `min_support` untuk mengendalikan ukuran keluaran.
 
 ## Output
 File CSV akan disimpan di folder `Outputs/`:
